@@ -117,8 +117,6 @@
         </div>
     </div>
 
-    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> --}}
-
     <script>
         var socket = io.connect('http://localhost:8890');
         var _token = '{{ csrf_token() }}';
@@ -126,7 +124,6 @@
         var group = '';
 
         $(document).ready(function() {
-            // Select2 Multiple
             $('.select2-multiple').select2({
                 dropdownParent: $("#groupModal"),
                 placeholder: "Select",
@@ -136,7 +133,6 @@
         });
 
         socket.on('new-message', function (data) {
-            // console.log(data);
             if(data.group_id == group) {
                 if(data.user_id == user_id) {
                     $( "#chat-message" ).append('<div style="display: inline;" id="child-chat">'+
