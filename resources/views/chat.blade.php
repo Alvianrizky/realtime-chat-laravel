@@ -150,21 +150,24 @@
                 }
             }
 
+            document.getElementById("chat-user").innerHTML = '';
+            getUserChat();
+
         });
 
         getUser();
         getUserChat();
 
         function chat(groupId, name) {
-            document.getElementById("group_"+groupId+"").classList.add("text-white");
-            document.getElementById("group_"+groupId+"").classList.add("bg-primary");
-            document.getElementById("group_"+groupId+"").classList.add("bg-opacity-75");
-
             if(group != '') {
                 document.getElementById("group_"+group+"").classList.remove("text-white");
                 document.getElementById("group_"+group+"").classList.remove("bg-primary");
                 document.getElementById("group_"+group+"").classList.remove("bg-opacity-75");
             }
+
+            document.getElementById("group_"+groupId+"").classList.add("text-white");
+            document.getElementById("group_"+groupId+"").classList.add("bg-primary");
+            document.getElementById("group_"+groupId+"").classList.add("bg-opacity-75");
 
             console.log(group);
             console.log(groupId);
@@ -265,6 +268,12 @@
                             '</button>');
                         }
                     });
+
+                    if(group != '') {
+                        document.getElementById("group_"+group+"").classList.add("text-white");
+                        document.getElementById("group_"+group+"").classList.add("bg-primary");
+                        document.getElementById("group_"+group+"").classList.add("bg-opacity-75");
+                    }
                 }
             });
         }
@@ -279,16 +288,17 @@
                     'user':user
                 },
                 success:function(data) {
+                    document.getElementById("chat-user").innerHTML = '';
 
                     $.each (data, function (k, v) {
                         if(v.group.type == 'private') {
-                            $( "#chat-user" ).append('<button class="text-start" style="width: 100%" onClick="chat('+v.group_id+', \'' + v.user.name + '\')">'+
+                            $( "#chat-user" ).append('<button class="text-start" id="group_'+v.group_id+'" style="width: 100%" onClick="chat('+v.group_id+', \'' + v.user.name + '\')">'+
                             '<div class="border-top border-bottom rounded py-3 px-2" >'+
                                 v.user.name+
                             '</div>'+
                             '</button>');
                         } else {
-                            $( "#chat-user" ).append('<button class="text-start" style="width: 100%" onclick="chat('+v.group_id+', \'' + v.group.name + '\')">'+
+                            $( "#chat-user" ).append('<button class="text-start" id="group_'+v.group_id+'" style="width: 100%" onclick="chat('+v.group_id+', \'' + v.group.name + '\')">'+
                             '<div class="border-top border-bottom rounded py-3 px-2" >'+
                                 v.group.name+
                             '</div>'+
@@ -313,16 +323,17 @@
                     'name':name,
                 },
                 success:function(data) {
+                    document.getElementById("chat-user").innerHTML = '';
 
                     $.each (data, function (k, v) {
                         if(v.group.type == 'private') {
-                            $( "#chat-user" ).append('<button class="text-start" style="width: 100%" onClick="chat('+v.group_id+', \'' + v.user.name + '\')">'+
+                            $( "#chat-user" ).append('<button class="text-start" id="group_'+v.group_id+'" style="width: 100%" onClick="chat('+v.group_id+', \'' + v.user.name + '\')">'+
                             '<div class="border-top border-bottom rounded py-3 px-2" >'+
                                 v.user.name+
                             '</div>'+
                             '</button>');
                         } else {
-                            $( "#chat-user" ).append('<button class="text-start" style="width: 100%" onclick="chat('+v.group_id+', \'' + v.group.name + '\')">'+
+                            $( "#chat-user" ).append('<button class="text-start" id="group_'+v.group_id+'" style="width: 100%" onclick="chat('+v.group_id+', \'' + v.group.name + '\')">'+
                             '<div class="border-top border-bottom rounded py-3 px-2" >'+
                                 v.group.name+
                             '</div>'+

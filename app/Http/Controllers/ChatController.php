@@ -23,7 +23,12 @@ class ChatController extends Controller
         $groupUser = GroupUser::where('user_id', Auth::user()->id)->with(['user', 'group'])->get();
         if($groupUser) {
             $groupId = array_column($groupUser->toArray(), 'group_id');
-            $groupUser = GroupUser::whereNot('user_id', Auth::user()->id)->whereIn('group_id', $groupId)->groupBy('group_id')->with(['user', 'group'])->get();
+            $groupUser = GroupUser::whereNot('user_id', Auth::user()->id)
+                ->whereIn('group_id', $groupId)
+                ->groupBy('group_id')
+                ->orderBy('updated_at', 'DESC')
+                ->with(['user', 'group'])
+                ->get();
         }
 
         return response()->json($groupUser);
@@ -31,47 +36,61 @@ class ChatController extends Controller
 
     public function listUser()
     {
-        $groupUser = GroupUser::where('user_id', Auth::user()->id)->with(['user', 'group'])->get();
-        $userId = [];
-        if($groupUser) {
-            $groupId = array_column($groupUser->toArray(), 'group_id');
-            $group = GroupUser::whereNot('user_id', Auth::user()->id)->whereIn('group_id', $groupId)->get();
-            $userId = array_column($group->toArray(), 'user_id');
-        }
+        // $groupUser = GroupUser::where('user_id', Auth::user()->id)->with(['user', 'group'])->get();
+        // $userId = [];
+        // if($groupUser) {
+        //     $groupId = array_column($groupUser->toArray(), 'group_id');
+        //     $group = GroupUser::whereNot('user_id', Auth::user()->id)->whereIn('group_id', $groupId)->get();
+        //     $userId = array_column($group->toArray(), 'user_id');
+        // }
 
-        $user = User::whereNot('id', Auth::user()->id);
+        $user = User::whereNot('id', Auth::user()->id)->get();
 
-        if($userId) {
-            $user = $user->whereNotIn('id', $userId)->get();
-        } else {
-            $user = $user->get();
-        }
+        // if($userId) {
+        //     $user = $user->whereNotIn('id', $userId)->get();
+        // } else {
+        //     $user = $user->get();
+        // }
 
         return response()->json($user);
     }
 
     public function storeUser(Request $request)
     {
-        $group = Group::create([
-            'type' => 'private',
-            'created_at' => date('Y-m-d H:i:s')
-        ]);
+        $groupUser = GroupUser::join('groups', 'group_users.group_id', '=', 'groups.id')
+            ->where('type', 'private')
+            ->where('user_id', Auth::user()->id)
+            ->get();
 
-        $data = [];
+        if($groupUser) {
+            $groupId = array_column($groupUser->toArray(), 'id');
+            $groupUser = GroupUser::where('user_id', $request->input('user'))
+                ->whereIn('group_id', $groupId)
+                ->first();
+        }
 
-        $data[] = [
-            'user_id' =>  Auth::user()->id,
-            'group_id' =>  $group->id,
-            'created_at' => date('Y-m-d H:i:s')
-        ];
+        if($groupUser == null || empty($groupUser)) {
+            $group = Group::create([
+                'type' => 'private',
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
 
-        $data[] = [
-            'user_id' =>  $request->input('user'),
-            'group_id' =>  $group->id,
-            'created_at' => date('Y-m-d H:i:s')
-        ];
+            $data = [];
 
-        GroupUser::insert($data);
+            $data[] = [
+                'user_id' =>  Auth::user()->id,
+                'group_id' =>  $group->id,
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+
+            $data[] = [
+                'user_id' =>  $request->input('user'),
+                'group_id' =>  $group->id,
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+
+            GroupUser::insert($data);
+        }
 
         $groupUser = GroupUser::where('user_id', Auth::user()->id)->with(['user', 'group'])->get();
         if ($groupUser) {
@@ -139,9 +158,16 @@ class ChatController extends Controller
             'created_at' => date('Y-m-d H:i:s')
         ];
 
+        GroupUser::where('group_id', $request->input('group_id'))
+            ->update([
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+
         $message = Message::create($data);
         $chat = Message::where('id', $message->id)->with('user')->first();
 
         return response()->json($chat);
     }
+
+
 }
