@@ -30,14 +30,6 @@
                         </div>
                     </div>
                     <div class="card-body" id="chat-user">
-                        {{-- <div class="border-top border-bottom rounded text-white py-3 px-2 bg-primary bg-opacity-75">
-                            dd
-                        </div> --}}
-                        {{-- <button class="text-start" style="width: 100%">
-                            <div class="border-top border-bottom rounded py-3 px-2">
-                                dd
-                            </div>
-                        </button> --}}
                     </div>
                 </div>
             </div>
@@ -47,20 +39,6 @@
                         <h5 id="title-chat">User</h5>
                     </div>
                     <div class="card-body d-flex flex-column" id="chat-message" style="overflow-y: auto; ">
-
-                        {{-- <div style="display: inline;">
-                            <div class="card p-2 mb-3 bg-primary text-white" style="max-width: 80%; float: left;">
-                                <div class="fw-bold">Rizky</div>
-                                <div>cek data aja masuk ga ya harusnya sih masuk iya ga sih masak enggak</div>
-                            </div>
-                        </div>
-
-                        <div style="display: inline;">
-                            <div class="card p-2 mb-3 bg-success text-white" style="max-width: 80%; float: right !important;">
-                                <div>cek data aja</div>
-                            </div>
-                        </div> --}}
-
                     </div>
                     <div class="card-footer bg-white">
                         <div class="row my-1">
@@ -253,17 +231,21 @@
                 dataType: "json",
                 success:function(data) {
 
+                    console.log(data);
+
                     $.each (data, function (k, v) {
                         if(v.group.type == 'private') {
                             $( "#chat-user" ).append('<button class="text-start" id="group_'+v.group_id+'" style="width: 100%" onClick="chat('+v.group_id+', \'' + v.user.name + '\')">'+
                             '<div class="border-top border-bottom rounded py-3 px-2" >'+
                                 v.user.name+
+                                // '<span class="badge text-bg-success float-end">'+v.count+'</span>'+
                             '</div>'+
                             '</button>');
                         } else {
                             $( "#chat-user" ).append('<button class="text-start" id="group_'+v.group_id+'" style="width: 100%" onclick="chat('+v.group_id+', \'' + v.group.name + '\')">'+
                             '<div class="border-top border-bottom rounded py-3 px-2" >'+
                                 v.group.name+
+                                // '<span class="badge text-bg-success float-end">'+v.count+'</span>'+
                             '</div>'+
                             '</button>');
                         }

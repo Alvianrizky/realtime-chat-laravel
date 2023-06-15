@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Group;
 use App\Models\GroupAdmin;
+use App\Models\GroupCountView;
 use App\Models\GroupUser;
 use App\Models\Message;
 use App\Models\User;
@@ -29,6 +30,21 @@ class ChatController extends Controller
                 ->orderBy('updated_at', 'DESC')
                 ->with(['user', 'group'])
                 ->get();
+
+            foreach($groupUser as $value) {
+
+                if($value->group->type == 'group') {
+                    $count = GroupCountView::where('group_id', $value->group_id)
+                        ->where('user_id', Auth::user()->id)
+                        ->first();
+                } else {
+                    $count = GroupCountView::where('group_id', $value->group_id)
+                        ->where('user_id', Auth::user()->id)
+                        ->first();
+                }
+
+                $value->count = $count != null ? $count->count : '0';
+            }
         }
 
         return response()->json($groupUser);
@@ -145,6 +161,14 @@ class ChatController extends Controller
     {
         $chat = Message::where('group_id', $request->input('group_id'))->with('user')->get();
 
+        $count = GroupCountView::where('user_id', Auth::user()->id)
+            ->where('group_id', $request->input('group_id'))
+            ->first();
+
+        if($count) {
+            $count->update(['count' => '0']);
+        }
+
         return response()->json($chat);
     }
 
@@ -166,7 +190,35 @@ class ChatController extends Controller
         $message = Message::create($data);
         $chat = Message::where('id', $message->id)->with('user')->first();
 
+        $this->countChat($request->input('group_id'));
+
         return response()->json($chat);
+    }
+
+    public function countChat($groupId)
+    {
+        $group = Group::find($groupId);
+
+
+        $groupUser = GroupUser::where('group_id', $groupId)
+            ->whereNot('user_id', Auth::user()->id)
+            ->get();
+
+        foreach($groupUser as $value) {
+            $count = GroupCountView::where('user_id', $value->user_id)
+                ->where('group_id', $groupId)
+                ->first();
+
+            if($count == null) {
+                GroupCountView::create([
+                    'group_id' => $groupId,
+                    'user_id' => $value->user_id,
+                    'count' => 1
+                ]);
+            } else {
+                $count->update(['count' => $count->count + 1]);
+            }
+        }
     }
 
 
